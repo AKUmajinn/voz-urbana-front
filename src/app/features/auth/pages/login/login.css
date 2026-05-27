@@ -1,0 +1,33 @@
+.login-container {
+  background-color: #0f172a !important; 
+}
+
+.style-login-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #1e293b !important; 
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.05) !important;
+}
+
+.input-group-text, 
+.form-control {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+.form-control:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+.hover-opacity-100 {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.hover-opacity-100:hover {
+  opacity: 1 !important;
+}
