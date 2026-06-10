@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Auth } from '../../../../core/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -15,7 +16,8 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: Auth
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +39,15 @@ export class LoginComponent implements OnInit {
   onSubmit(): void {
     if (this.loginForm.invalid) return;
 
-    console.log('Credenciales ingresadas en modo maqueta:', this.loginForm.value);
-    this.router.navigate(['/dashboard']);
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (res: any) => {
+        console.log('Login Exitoso, Token:', res.token);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err: any) => {
+        console.error('Error en el login', err);
+        alert('Credenciales incorrectas');
+      }
+    });
   }
 }
