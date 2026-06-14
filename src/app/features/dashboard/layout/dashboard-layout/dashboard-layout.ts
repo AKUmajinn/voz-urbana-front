@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -9,15 +9,22 @@ import { CommonModule } from '@angular/common';
   templateUrl: './dashboard-layout.html',
   styleUrls: ['./dashboard-layout.css']
 })
-export class DashboardLayoutComponent {
-  municipioNombre: string = 'San Isidro (ID: 101)';
-  usuarioUsername: string = 'Johelyn_Analist';
-  usuarioRol: string = 'Coordinador Municipal';
+export class DashboardLayoutComponent implements OnInit {
+  municipioNombre: string = '';
+  usuarioUsername: string = '';
+  usuarioRol: string = '';
 
   constructor(private router: Router) {}
 
+  ngOnInit(): void {
+    this.usuarioUsername = localStorage.getItem('username') || 'Usuario Desconocido';
+    this.usuarioRol = localStorage.getItem('role') === 'ROLE_ADMIN' ? 'Administrador' : 'Coordinador Municipal';
+    const muniId = localStorage.getItem('municipalidadId');
+    this.municipioNombre = `Municipalidad (ID: ${muniId})`;
+  }
+
   logout(): void {
-    console.log('Cerrando sesión en modo maqueta...');
+    localStorage.clear();
     this.router.navigate(['/login']);
   }
 }

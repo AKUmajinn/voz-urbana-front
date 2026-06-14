@@ -1,20 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-
-export interface IncidenciaMock {
-  id: number;
-  descripcion: string;
-  estado: 'PENDIENTE' | 'RESUELTO';
-  url_foto: string;
-}
-
-export interface MaterialMock {
-  id: number;
-  codigo: string;
-  nombre: string;
-  stockActual: number;
-}
+import { IncidenciaService } from '../../../../core/services/incidencia';
+import { MaterialService } from '../../../../core/services/material';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-incidencia-list',
@@ -24,36 +13,26 @@ export interface MaterialMock {
   styleUrls: ['./incidencia-list.css']
 })
 export class IncidenciaListComponent implements OnInit {
-  incidencias: IncidenciaMock[] = [];
-  municipioActual = 'San Isidro (ID: 101)';
-
-  materiales: MaterialMock[] = [];
+  incidencias: any[] = [];
+  materiales: any[] = [];
+  
   panelCierreAbierto: boolean = false;
-  incidenciaSeleccionada: IncidenciaMock | null = null;
+  incidenciaSeleccionada: any | null = null;
   cierreForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  municipioActual = '';
+  apiUrl = environment.apiUrl;
+
+  constructor(
+    private fb: FormBuilder,
+    private incidenciaService: IncidenciaService,
+    private materialService: MaterialService
+  ) {}
 
   ngOnInit(): void {
-    this.cargarMocks();
+    this.municipioActual = `ID: ${localStorage.getItem('municipalidadId')}`;
     this.initForm();
-  }
-
-  private cargarMocks(): void {
-    this.incidencias = [
-      { id: 1, descripcion: 'Bache en Av. Larco', estado: 'PENDIENTE', url_foto: 'assets/bache.jpg' },
-      { id: 2, descripcion: 'Luminaria rota', estado: 'PENDIENTE', url_foto: 'assets/luz.jpg' },
-      { id: 3, descripcion: 'Semáforo averiado', estado: 'RESUELTO', url_foto: 'assets/semaforo.jpg' },
-      { id: 4, descripcion: 'Árbol caído', estado: 'PENDIENTE', url_foto: 'assets/arbol.jpg' },
-      { id: 5, descripcion: 'Vereda dañada', estado: 'RESUELTO', url_foto: 'assets/vereda.jpg' },
-      { id: 6, descripcion: 'Alcantarilla tapada', estado: 'PENDIENTE', url_foto: 'assets/alcantarilla.jpg' }
-    ];
-
-    this.materiales = [
-      { id: 203, codigo: 'MAT-203', nombre: 'Arena 05', stockActual: 150 },
-      { id: 204, codigo: 'MAT-204', nombre: 'Cemento Gris Tipo I', stockActual: 80 },
-      { id: 205, codigo: 'MAT-205', nombre: 'Pintura Tráfico', stockActual: 45 }
-    ];
+    this.cargarDatosReales();
   }
 
   private initForm(): void {
@@ -64,7 +43,28 @@ export class IncidenciaListComponent implements OnInit {
     });
   }
 
-  abrirPanelCierre(incidencia: IncidenciaMock): void {
+  private cargarDatosReales(): void {
+    this.incidenciaService.getAll().subscribe({
+      next: (data) => {
+        this.incidencias = data;
+      },
+      error: (err) => console.error('Error cargando incidencias', err)
+    });
+
+    this.materialService.getAll().subscribe({
+      next: (data) => {
+        this.materiales = data;
+      },
+      error: (err) => console.error('Error cargando materiales', err)
+    });
+  }
+
+  getEvidenciaUrl(fotoPath: string): string {
+    if (!fotoPath) return 'assets/placeholder.jpg';
+    return `${this.apiUrl}/images/${fotoPath}`;
+  }
+
+  abrirPanelCierre(incidencia: any): void {
     this.incidenciaSeleccionada = incidencia;
     this.cierreForm.reset({ estado: 'RESUELTO', materialId: '', cantidadUsada: 1 });
     this.panelCierreAbierto = true;
@@ -76,11 +76,21 @@ export class IncidenciaListComponent implements OnInit {
   }
 
   onSubmitCierre(): void {
-    if (this.cierreForm.invalid) return;
-    
-    if (this.incidenciaSeleccionada) {
-      this.incidenciaSeleccionada.estado = 'RESUELTO';
-    }
-    this.cerrarPanel();
+    if (this.cierreForm.invalid || !this.incidenciaSeleccionada) return;
+
+    const payload = {
+      estado: this.cierreForm.value.estado
+    };
+
+    this.incidenciaService.updateEstado(this.incidenciaSeleccionada.id, payload).subscribe({
+      next: (res) => {
+        this.incidenciaSeleccionada.estado = 'RESUELTO';
+        this.cerrarPanel();
+      },
+      error: (err) => {
+        console.error('Error al actualizar el estado', err);
+        alert('Hubo un error al cerrar el ticket');
+      }
+    });
   }
 }
