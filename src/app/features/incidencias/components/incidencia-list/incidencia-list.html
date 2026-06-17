@@ -3,9 +3,24 @@
   <h3 class="text-center text-white mb-4 fw-light tracking-wide">Panel de Incidencias Urbanas</h3>
 
   <div class="card bg-secondary text-white border-0 shadow-lg style-table-card">
+    
     <div class="card-header border-bottom border-secondary pt-4 pb-3 px-4 bg-transparent">
-      <h5 class="mb-1 fw-normal">Listado de Incidencias (HU02)</h5>
-      <p class="m-0 text-white-50 small">Filtrado por Municipalidad: {{ municipioActual }}</p>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1 fw-normal">Listado de Incidencias</h5>
+          <p class="m-0 text-white-50 small">Filtrado por Municipalidad: {{ municipioActual }}</p>
+        </div>
+        
+        <button class="btn style-btn-orange fw-bold rounded-pill px-4" routerLink="/dashboard/incidencias/nueva">
+          <i class="bi bi-plus-lg me-2"></i>Reportar Incidencia
+        </button>
+      </div>
+
+      <form [formGroup]="buscarForm" (ngSubmit)="buscarIncidencia()" class="d-flex gap-2 align-items-center">
+        <input type="number" class="form-control bg-dark text-white border-secondary shadow-none w-auto" formControlName="idBuscado" placeholder="Buscar por ID...">
+        <button type="submit" class="btn btn-outline-info px-3">Buscar</button>
+        <button type="button" class="btn btn-outline-light px-3" *ngIf="buscarForm.value.idBuscado" (click)="limpiarBusqueda()">Limpiar</button>
+      </form>
     </div>
 
     <div class="card-body p-0">
@@ -22,12 +37,12 @@
           </thead>
           <tbody>
             <tr *ngFor="let item of incidencias">
-              <td class="px-4 py-3">{{ item.id }}</td>
+              <td class="px-4 py-3">{{ item.incidencia_id }}</td>
               <td class="py-3">{{ item.descripcion }}</td>
               <td class="py-3 text-center">
-                <button class="btn btn-sm text-info hover-opacity-100 p-0" title="Ver foto">
+                <a [href]="item.foto" target="_blank" class="btn btn-sm text-info hover-opacity-100 p-0" title="Ver foto">
                   <i class="bi bi-image fs-5"></i>
-                </button>
+                </a>
               </td>
               <td class="py-3 text-center">
                 <span class="badge rounded-pill px-3 py-2 fw-semibold style-badge"
@@ -35,14 +50,27 @@
                   {{ item.estado }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-center">
-                <button *ngIf="item.estado === 'PENDIENTE'" 
-                        (click)="abrirPanelCierre(item)"
-                        class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 style-action-btn">
-                  Cerrar Ticket
-                </button>
-                <i *ngIf="item.estado === 'RESUELTO'" class="bi bi-check2-all text-success fs-5"></i>
+              <td class="px-4 py-3">
+                <div class="d-flex justify-content-center align-items-center gap-3">
+                  <div style="width: 130px; text-align: center;">
+                    <button *ngIf="item.estado === 'PENDIENTE'" 
+                            (click)="abrirPanelCierre(item)"
+                            class="btn btn-sm btn-outline-info rounded-pill w-100 py-1 style-action-btn">
+                      Cerrar Ticket
+                    </button>
+                    <i *ngIf="item.estado === 'RESUELTO'" class="bi bi-check2-all text-success fs-4"></i>
+                  </div>
+                  <button (click)="eliminarIncidencia(item.incidencia_id)"
+                          class="btn btn-sm btn-outline-danger rounded-circle p-1 d-flex align-items-center justify-content-center flex-shrink-0"
+                          style="width: 32px; height: 32px;"
+                          title="Eliminar incidencia">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
               </td>
+            </tr>
+            <tr *ngIf="incidencias.length === 0">
+              <td colspan="5" class="text-center py-4 text-white-50">No se encontraron resultados.</td>
             </tr>
           </tbody>
         </table>
@@ -52,17 +80,22 @@
 
   <div class="offcanvas-backdrop fade show style-backdrop" *ngIf="panelCierreAbierto" (click)="cerrarPanel()"></div>
 
-  <div class="offcanvas offcanvas-end text-white style-side-panel show shadow-lg" *ngIf="panelCierreAbierto">
-    <div class="offcanvas-header border-bottom border-secondary p-4">
+  <div class="offcanvas offcanvas-end text-white style-side-panel show shadow-lg" *ngIf="panelCierreAbierto" style="width: 450px; overflow-y: auto;">
+    <div class="offcanvas-header border-bottom border-secondary p-4 sticky-top bg-dark">
       <div>
-        <h5 class="offcanvas-title fw-normal">Cerrar Incidencia #{{ incidenciaSeleccionada?.id }}</h5>
-        <p class="m-0 text-white-50">{{ incidenciaSeleccionada?.descripcion }}</p>
+        <h5 class="offcanvas-title fw-normal">Cerrar Incidencia #{{ incidenciaSeleccionada?.incidencia_id }}</h5>
       </div>
       <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="cerrarPanel()"></button>
     </div>
 
     <div class="offcanvas-body p-4 d-flex flex-column">
       <form [formGroup]="cierreForm" (ngSubmit)="onSubmitCierre()" class="d-flex flex-column h-100">
+        
+        <div class="mb-4">
+          <label class="form-label text-white-50 small">Descripción Final de Resolución</label>
+          <textarea class="form-control bg-dark text-white border-secondary shadow-none" formControlName="descripcion" rows="3"></textarea>
+        </div>
+
         <div class="mb-4">
           <label class="form-label text-white-50 small">Cambiar estado a:</label>
           <select class="form-select bg-dark text-white border-secondary shadow-none" formControlName="estado">
@@ -70,24 +103,36 @@
           </select>
         </div>
 
-        <h6 class="fw-semibold mb-3 border-bottom border-secondary pb-2">Especificar Materiales y Cantidad</h6>
-
-        <div class="mb-3">
-          <label class="form-label text-white-50 small">Material Utilizado</label>
-          <select class="form-select bg-dark text-white border-secondary shadow-none" formControlName="materialId">
-            <option value="" disabled selected>Seleccione un material...</option>
-            <option *ngFor="let mat of materiales" [value]="mat.id">
-              {{ mat.nombre }} ({{ mat.codigo }}) - Stock: {{ mat.stockActual }} kg
-            </option>
-          </select>
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-secondary pb-2">
+          <h6 class="fw-semibold m-0">Materiales Utilizados</h6>
+          <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" (click)="agregarDetalle()">
+            <i class="bi bi-plus-lg"></i> Agregar
+          </button>
         </div>
 
-        <div class="mb-4">
-          <label class="form-label text-white-50 small">Cantidad Usada</label>
-          <input type="number" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="cantidadUsada" min="1">
+        <div formArrayName="detalles">
+          <div *ngFor="let detalle of detalles.controls; let i=index" [formGroupName]="i" class="p-3 bg-dark border border-secondary rounded mb-3 position-relative">
+            
+            <button type="button" *ngIf="detalles.length > 1" class="btn-close btn-close-white position-absolute top-0 end-0 m-2" style="font-size: 0.6rem;" (click)="removerDetalle(i)"></button>
+            
+            <div class="mb-3">
+              <label class="form-label text-white-50 small">Seleccionar Material</label>
+              <select class="form-select bg-dark text-white border-secondary shadow-none" formControlName="materialId">
+                <option value="" disabled selected>Seleccione un material...</option>
+                <option *ngFor="let mat of materiales" [value]="mat.material_id">
+                  {{ mat.nombre_material }} ({{ mat.codigo_material }}) - Stock: {{ mat.stock }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-1">
+              <label class="form-label text-white-50 small">Cantidad Usada</label>
+              <input type="number" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="cantidadUsada" min="1">
+            </div>
+          </div>
         </div>
 
-        <div class="mt-auto mb-4">
+        <div class="mt-auto mb-4 pt-3">
           <label class="form-label text-white-50 small">Validación de Sistema</label>
           <div class="p-3 bg-dark border border-secondary rounded text-white-50 small">
             <i class="bi bi-check-circle-fill text-success me-2"></i> Stock Verificado<br>
@@ -95,12 +140,11 @@
           </div>
         </div>
 
-        <div class="d-flex gap-2 justify-content-end mt-2 border-top border-secondary pt-3">
+        <div class="d-flex gap-2 justify-content-end mt-2 border-top border-secondary pt-3 sticky-bottom bg-dark pb-2">
           <button type="button" class="btn btn-outline-light" (click)="cerrarPanel()">CANCELAR</button>
           <button type="submit" class="btn style-btn-orange fw-bold" [disabled]="cierreForm.invalid">CONFIRMAR CIERRE</button>
         </div>
       </form>
     </div>
   </div>
-
 </div>

@@ -15,7 +15,19 @@ export class IncidenciaService {
     return this.http.get<any[]>(`${this.apiUrl}/all`);
   }
 
-  updateEstado(id: number, payload: { estado: string }): Observable<any> {
+  getById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/search/${id}`);
+  }
+
+  updateEstado(id: number, payload: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/update/${id}`, payload);
+  }
+
+  crear(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/create`, formData); 
+  }
+
+  eliminar(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/${id}`);
   }
 }

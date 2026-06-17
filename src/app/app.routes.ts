@@ -14,6 +14,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/incidencias/components/incidencia-list/incidencia-list').then(m => m.IncidenciaListComponent)
       },
       {
+        path: 'incidencias/nueva',
+        loadComponent: () => import('./features/incidencias/components/incidencia-create/incidencia-create').then(m => m.IncidenciaCreateComponent)
+      },
+      {
         path: 'inventario',
         loadComponent: () => import('./features/inventario/components/material-list/material-list').then(m => m.MaterialListComponent)
       },
