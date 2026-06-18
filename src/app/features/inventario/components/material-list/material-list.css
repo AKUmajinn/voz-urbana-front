@@ -1,7 +1,6 @@
 .style-table-card {
   background-color: #1e293b !important;
   border-radius: 12px;
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.03) !important;
   max-width: 900px;
   margin: 0 auto;
 }
@@ -12,11 +11,6 @@
 
 .style-custom-table tbody tr {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background-color 0.2s ease;
-}
-
-.style-custom-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.03) !important;
 }
 
 .style-custom-table td, 
@@ -29,10 +23,6 @@
   letter-spacing: 0.5px;
   font-size: 0.75rem;
   width: 120px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
 }
 
 .style-action-btn {
@@ -42,11 +32,40 @@
   font-weight: 600;
 }
 
-.hover-opacity-100 {
-  transition: opacity 0.2s, color 0.2s;
+.style-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
 }
 
-.hover-opacity-100:hover {
-  opacity: 1 !important;
-  color: #38bdf8 !important;
+.style-side-panel {
+  visibility: visible;
+  background-color: #27272a !important;
+  border-left: 1px solid #3f3f46;
+  width: 420px;
+  z-index: 1045;
+  transition: transform 0.3s ease-in-out;
+}
+
+.form-control:focus, 
+.form-select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
+  background-color: #18181b !important;
+  color: white !important;
+}
+
+.style-btn-orange {
+  background-color: #f59e0b;
+  color: #18181b;
+  border: none;
+}
+
+.style-btn-orange:hover {
+  background-color: #d97706;
+  color: #18181b;
+}
+
+.style-btn-orange:disabled {
+  background-color: #fcd34d;
+  opacity: 0.7;
 }

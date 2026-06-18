@@ -1,15 +1,30 @@
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 position-relative">
   <h3 class="text-center text-white mb-4 fw-light tracking-wide">Inventario de Materiales</h3>
 
-  <div class="card bg-secondary text-white border-0 shadow-lg style-table-card">
-    <div class="card-header border-bottom border-secondary pt-4 pb-3 px-4 bg-transparent d-flex justify-content-between align-items-center">
-      <div>
-        <h5 class="mb-1 fw-normal">Stock Disponible</h5>
-        <p class="m-0 text-white-50 small">Filtrado por Municipalidad: {{ municipioActual }}</p>
+  <div class="card text-white border-0 shadow-lg style-table-card">
+    <div class="card-header border-bottom border-secondary pt-4 pb-3 px-4 bg-transparent">
+      
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1 fw-normal">Stock Disponible</h5>
+          <p class="m-0 text-white-50 small">Filtrado por Municipalidad: {{ municipioActual }}</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 style-action-btn">
+            <i class="bi bi-download me-1"></i> Exportar
+          </button>
+          <button class="btn style-btn-orange fw-bold rounded-pill px-4" (click)="abrirPanel()">
+            <i class="bi bi-plus-lg me-2"></i>Registrar Material
+          </button>
+        </div>
       </div>
-      <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 style-action-btn">
-        <i class="bi bi-download me-1"></i> Exportar
-      </button>
+
+      <form [formGroup]="buscarForm" (ngSubmit)="buscarMaterial()" class="d-flex gap-2 align-items-center">
+        <input type="number" class="form-control bg-dark text-white border-secondary shadow-none w-auto" formControlName="idBuscado" placeholder="Buscar por ID...">
+        <button type="submit" class="btn btn-outline-info px-3">Buscar</button>
+        <button type="button" class="btn btn-outline-light px-3" *ngIf="buscarForm.value.idBuscado" (click)="limpiarBusqueda()">Limpiar</button>
+      </form>
+
     </div>
 
     <div class="card-body p-0">
@@ -21,12 +36,13 @@
               <th scope="col" class="py-3 fw-semibold">Nombre del Material</th>
               <th scope="col" class="py-3 fw-semibold text-center">Stock Actual</th>
               <th scope="col" class="px-4 py-3 fw-semibold text-center">Estado del Inventario</th>
+              <th scope="col" class="px-4 py-3 fw-semibold text-center">Acción</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let item of materiales">
-              <td class="px-4 py-3 text-white-50">MAT-{{ item.id }}</td>
-              <td class="py-3 fw-medium">{{ item.nombre_item }}</td>
+              <td class="px-4 py-3 text-white-50">{{ item.codigo_material }}</td>
+              <td class="py-3 fw-medium">{{ item.nombre_material }}</td>
               <td class="py-3 text-center fs-5 fw-bold" 
                   [ngClass]="esStockCritico(item.stock) ? 'text-danger' : 'text-white'">
                 {{ item.stock }}
@@ -38,6 +54,25 @@
                   {{ esStockCritico(item.stock) ? 'REABASTECER' : 'ÓPTIMO' }}
                 </span>
               </td>
+              <td class="px-4 py-3 text-center">
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                  <button (click)="abrirPanel(item)"
+                          class="btn btn-sm btn-outline-info rounded-circle p-1 d-flex align-items-center justify-content-center"
+                          style="width: 32px; height: 32px;"
+                          title="Editar material">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button (click)="eliminarMaterial(item.material_id)"
+                          class="btn btn-sm btn-outline-danger rounded-circle p-1 d-flex align-items-center justify-content-center"
+                          style="width: 32px; height: 32px;"
+                          title="Eliminar material">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="materiales.length === 0">
+              <td colspan="5" class="text-center py-4 text-white-50">No hay materiales registrados.</td>
             </tr>
           </tbody>
         </table>
@@ -45,12 +80,50 @@
     </div>
 
     <div class="card-footer border-top border-secondary bg-transparent py-3 px-4 d-flex justify-content-end text-white-50 small align-items-center">
-      <span>1 - 6 of 45 records | Página</span>
+      <span>1 - {{ materiales.length }} records | Página</span>
       <div class="d-flex gap-2 ms-3">
         <a href="javascript:void(0)" class="text-white text-decoration-none fw-bold border-bottom border-info">1</a>
-        <a href="javascript:void(0)" class="text-white-50 text-decoration-none hover-opacity-100">2</a>
-        <span class="ms-1">...</span>
       </div>
+    </div>
+  </div>
+
+  <div class="offcanvas-backdrop fade show style-backdrop" *ngIf="panelAbierto" (click)="cerrarPanel()"></div>
+
+  <div class="offcanvas offcanvas-end text-white style-side-panel show shadow-lg" *ngIf="panelAbierto">
+    <div class="offcanvas-header border-bottom border-secondary p-4">
+      <div>
+        <h5 class="offcanvas-title fw-normal">
+          {{ modoEdicion ? 'Editar Material #' + materialSeleccionado?.codigo_material : 'Registrar Nuevo Material' }}
+        </h5>
+      </div>
+      <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="cerrarPanel()"></button>
+    </div>
+
+    <div class="offcanvas-body p-4 d-flex flex-column">
+      <form [formGroup]="materialForm" (ngSubmit)="onSubmitMaterial()" class="d-flex flex-column h-100">
+        
+        <div class="mb-4">
+          <label class="form-label text-white-50 small">Nombre del Material</label>
+          <input type="text" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="nombre_material">
+        </div>
+
+        <div class="mb-4" *ngIf="modoEdicion">
+          <label class="form-label text-white-50 small">Código</label>
+          <input type="text" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="codigo_material">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-white-50 small">Stock Inicial / Actual</label>
+          <input type="number" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="stock" min="0">
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end mt-auto border-top border-secondary pt-3">
+          <button type="button" class="btn btn-outline-light" (click)="cerrarPanel()">CANCELAR</button>
+          <button type="submit" class="btn style-btn-orange fw-bold" [disabled]="materialForm.invalid">
+            {{ modoEdicion ? 'GUARDAR CAMBIOS' : 'REGISTRAR MATERIAL' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -14,4 +14,20 @@ export class MaterialService {
   getAll(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/all`);
   }
+
+  getById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/search/${id}`);
+  }
+
+  crear(payload: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/create`, payload);
+  }
+
+  update(id: number, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update/${id}`, payload);
+  }
+
+  eliminar(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/${id}`);
+  }
 }
