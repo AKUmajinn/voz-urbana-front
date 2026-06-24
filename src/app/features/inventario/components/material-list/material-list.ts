@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MaterialService } from '../../../../core/services/material';
 
 @Component({
-  selector: 'app-material-list',
+  selector: 'app-municipalidad-list',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './material-list.html',
@@ -12,7 +12,7 @@ import { MaterialService } from '../../../../core/services/material';
 })
 export class MaterialListComponent implements OnInit {
   materiales: any[] = [];
-  municipioActual = '';
+  materialActual = '';
   
   panelAbierto = false;
   modoEdicion = false;
@@ -28,7 +28,7 @@ export class MaterialListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.municipioActual = `ID: ${localStorage.getItem('municipalidadId')}`;
+    this.materialActual = `ID: ${localStorage.getItem('materialId')}`;
     this.initForm();
     this.cargarMateriales();
   }

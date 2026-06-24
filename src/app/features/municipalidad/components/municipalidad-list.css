@@ -1,0 +1,69 @@
+.style-table-card {
+  background-color: #1e293b !important;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.style-custom-table {
+  background-color: transparent !important;
+}
+
+.style-custom-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.style-custom-table td, 
+.style-custom-table th {
+  background-color: transparent !important;
+  color: #f8fafc;
+}
+
+.style-badge {
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  width: 120px;
+}
+
+.style-backdrop {
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1040;
+}
+
+.style-side-panel {
+  visibility: visible;
+  background-color: #27272a !important;
+  border-left: 1px solid #3f3f46;
+  width: 420px;
+  z-index: 1045;
+  transition: transform 0.3s ease-in-out;
+}
+
+.form-control:focus, 
+.form-select:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 0.25rem rgba(245, 158, 11, 0.25);
+  background-color: #18181b !important;
+  color: white !important;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 0.85rem;
+}
+
+.style-btn-orange {
+  background-color: #f59e0b;
+  color: #18181b;
+  border: none;
+}
+
+.style-btn-orange:hover {
+  background-color: #d97706;
+  color: #18181b;
+}
+
+.style-btn-orange:disabled {
+  background-color: #fcd34d;
+  opacity: 0.7;
+}

@@ -26,6 +26,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/usuarios/components/usuario-list/usuario-list').then(m => m.UsuarioListComponent)
       },
       {
+        path: 'municipalidad',
+        loadComponent: () => import('./features/municipalidad/components/municipalidad-list').then(m => m.MunicipalidadListComponent)
+      },
+      {
         path: '',
         redirectTo: 'incidencias',
         pathMatch: 'full'

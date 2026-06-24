@@ -1,25 +1,22 @@
 <div class="container-fluid py-4 position-relative">
-  <h3 class="text-center text-white mb-4 fw-light tracking-wide">Inventario de Materiales</h3>
+  <h3 class="text-center text-white mb-4 fw-light tracking-wide">Municipalidades</h3>
 
   <div class="card text-white border-0 shadow-lg style-table-card">
     <div class="card-header border-bottom border-secondary pt-4 pb-3 px-4 bg-transparent">
       
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h5 class="mb-1 fw-normal">Stock Disponible</h5>
-          <p class="m-0 text-white-50 small">Filtrado por Municipalidad: {{ materialActual }}</p>
-        </div>
+        
         <div class="d-flex gap-2 align-items-center">
           <button class="btn btn-sm btn-outline-info rounded-pill px-3 py-1 style-action-btn">
             <i class="bi bi-download me-1"></i> Exportar
           </button>
           <button class="btn style-btn-orange fw-bold rounded-pill px-4" (click)="abrirPanel()">
-            <i class="bi bi-plus-lg me-2"></i>Registrar Material
+            <i class="bi bi-plus-lg me-2"></i>Registrar Municipalidad
           </button>
         </div>
       </div>
 
-      <form [formGroup]="buscarForm" (ngSubmit)="buscarMaterial()" class="d-flex gap-2 align-items-center">
+      <form [formGroup]="buscarForm" (ngSubmit)="buscarMunicipalidad()" class="d-flex gap-2 align-items-center">
         <input type="number" class="form-control bg-dark text-white border-secondary shadow-none w-auto" formControlName="idBuscado" placeholder="Buscar por ID...">
         <button type="submit" class="btn btn-outline-info px-3">Buscar</button>
         <button type="button" class="btn btn-outline-light px-3" *ngIf="buscarForm.value.idBuscado" (click)="limpiarBusqueda()">Limpiar</button>
@@ -32,28 +29,15 @@
         <table class="table table-dark table-hover table-borderless align-middle m-0 style-custom-table">
           <thead class="border-bottom border-secondary text-white-50">
             <tr>
-              <th scope="col" class="px-4 py-3 fw-semibold">ID de Ítem</th>
-              <th scope="col" class="py-3 fw-semibold">Nombre del Material</th>
-              <th scope="col" class="py-3 fw-semibold text-center">Stock Actual</th>
-              <th scope="col" class="px-4 py-3 fw-semibold text-center">Estado del Inventario</th>
+              <th scope="col" class="px-4 py-3 fw-semibold">ID municipalidad</th>
+              <th scope="col" class="py-3 fw-semibold">Nombre de la municipalidad</th>
               <th scope="col" class="px-4 py-3 fw-semibold text-center">Acción</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of materiales">
-              <td class="px-4 py-3 text-white-50">{{ item.codigo_material }}</td>
-              <td class="py-3 fw-medium">{{ item.nombre_material }}</td>
-              <td class="py-3 text-center fs-5 fw-bold" 
-                  [ngClass]="esStockCritico(item.stock) ? 'text-danger' : 'text-white'">
-                {{ item.stock }}
-              </td>
-              <td class="px-4 py-3 text-center">
-                <span class="badge rounded-pill px-3 py-2 fw-semibold style-badge"
-                      [ngClass]="esStockCritico(item.stock) ? 'bg-danger text-white' : 'bg-success text-white'">
-                  <i class="bi" [ngClass]="esStockCritico(item.stock) ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'"></i>
-                  {{ esStockCritico(item.stock) ? 'REABASTECER' : 'ÓPTIMO' }}
-                </span>
-              </td>
+            <tr *ngFor="let item of municipalidades">
+              <td class="px-4 py-3 text-white-50">{{ item.municipalidad_id }}</td>
+              <td class="py-3 fw-medium">{{ item.nombre_municipio }}</td>
               <td class="px-4 py-3 text-center">
                 <div class="d-flex justify-content-center align-items-center gap-2">
                   <button (click)="abrirPanel(item)"
@@ -71,8 +55,8 @@
                 </div>
               </td>
             </tr>
-            <tr *ngIf="materiales.length === 0">
-              <td colspan="5" class="text-center py-4 text-white-50">No hay materiales registrados.</td>
+            <tr *ngIf="municipalidades.length === 0">
+              <td colspan="3" class="text-center py-4 text-white-50">No hay municipalidades registradas.</td>
             </tr>
           </tbody>
         </table>
@@ -80,7 +64,7 @@
     </div>
 
     <div class="card-footer border-top border-secondary bg-transparent py-3 px-4 d-flex justify-content-end text-white-50 small align-items-center">
-      <span>1 - {{ materiales.length }} records | Página</span>
+      <span>1 - {{ municipalidades.length }} records | Página</span>
       <div class="d-flex gap-2 ms-3">
         <a href="javascript:void(0)" class="text-white text-decoration-none fw-bold border-bottom border-info">1</a>
       </div>
@@ -93,34 +77,24 @@
     <div class="offcanvas-header border-bottom border-secondary p-4">
       <div>
         <h5 class="offcanvas-title fw-normal">
-          {{ modoEdicion ? 'Editar Material #' + materialSeleccionado?.codigo_material : 'Registrar Nuevo Material' }}
+          {{ modoEdicion ? 'Editar Municipalidad #' + municipalidadSeleccionada?.municipalidad_id : 'Registrar Nueva Municipalidad' }}
         </h5>
       </div>
       <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="cerrarPanel()"></button>
     </div>
 
     <div class="offcanvas-body p-4 d-flex flex-column">
-      <form [formGroup]="materialForm" (ngSubmit)="onSubmitMaterial()" class="d-flex flex-column h-100">
+      <form [formGroup]="municipalidadForm" (ngSubmit)="onSubmitMunicipalidad()" class="d-flex flex-column h-100">
         
         <div class="mb-4">
-          <label class="form-label text-white-50 small">Nombre del Material</label>
-          <input type="text" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="nombre_material">
-        </div>
-
-        <div class="mb-4" *ngIf="modoEdicion">
-          <label class="form-label text-white-50 small">Código</label>
-          <input type="text" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="codigo_material">
-        </div>
-
-        <div class="mb-4">
-          <label class="form-label text-white-50 small">Stock Inicial / Actual</label>
-          <input type="number" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="stock" min="0">
+          <label class="form-label text-white-50 small">Nombre de la Municipalidad</label>
+          <input type="text" class="form-control bg-dark text-white border-secondary shadow-none" formControlName="nombre_municipio">
         </div>
 
         <div class="d-flex gap-2 justify-content-end mt-auto border-top border-secondary pt-3">
           <button type="button" class="btn btn-outline-light" (click)="cerrarPanel()">CANCELAR</button>
-          <button type="submit" class="btn style-btn-orange fw-bold" [disabled]="materialForm.invalid">
-            {{ modoEdicion ? 'GUARDAR CAMBIOS' : 'REGISTRAR MATERIAL' }}
+          <button type="submit" class="btn style-btn-orange fw-bold" [disabled]="municipalidadForm.invalid">
+            {{ modoEdicion ? 'GUARDAR CAMBIOS' : 'REGISTRAR MUNICIPALIDAD' }}
           </button>
         </div>
       </form>
